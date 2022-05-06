@@ -14,5 +14,6 @@ urlpatterns = [
         events.handle_producer_event,
         {"format-channels": ["producer-{member_id}"]},
     ),
+    path("result/", views.handle_result, name="handle_result"),
     path("ping/", views.ping, name="ping"),
 ]
