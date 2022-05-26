@@ -1,5 +1,5 @@
 import functools
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import django_eventstream as dje
 from django.conf import settings
@@ -19,9 +19,49 @@ from rest_framework.response import Response
 from .models import Cluster, QueryRecord, User
 
 
+availability_buffer = {}
+
+
 def index(request):
     """NOTHING TO DO HERE."""
     return redirect(settings.HULSE_LANDING_URL)
+
+
+def select_active_channels(active_channels, user_candidate_channels):
+    """Sort channels by activity"""
+    # load all active channels to the availability buffer
+    for active_channel in active_channels:
+        if active_channel not in availability_buffer:
+            availability_buffer[active_channel] = {
+                "count": 0,
+                "updated_at": datetime.now(),
+            }
+        # reset the count if last updated more than 1 hour ago
+        elif availability_buffer[active_channel][
+            "updated_at"
+        ] < datetime.now() - timedelta(hours=1):
+            availability_buffer[active_channel]["count"] = 0
+            availability_buffer[active_channel]["updated_at"] = datetime.now()
+
+    # sort all channels by request count, return least requested
+    sorted_channels = {
+        k: v
+        for k, v in sorted(
+            availability_buffer.items(), key=lambda item: item[1]["count"]
+        )
+    }
+    selected_channel = list(sorted_channels.keys())[0]
+    # update availability buffer
+    availability_buffer[selected_channel] = {
+        "count": availability_buffer[selected_channel] + 1,
+        "updated_at": datetime.now(),
+    }
+
+    # channel, cluster, and selected host are sent back
+    return (
+        selected_channel,
+        *user_candidate_channels[selected_channel],
+    )
 
 
 def find_active_channel(user):
@@ -33,8 +73,7 @@ def find_active_channel(user):
     :return: Producer channel name.
     :rtype: str
     """
-    # find all events that match the current request
-    # find all people
+    # generate list of candidate channels to be checked for availability
     user_candidate_channels = {}
     for cluster in user.clusters.all():
         for member in cluster.members.all():
@@ -44,8 +83,6 @@ def find_active_channel(user):
     if len(user_candidate_channels) == 0:
         return None, None, None
 
-    # print("candidate channels", user_candidate_channels)
-
     # retrieve all active channels
     condition = functools.reduce(
         lambda q, f: q | Q(channel__startswith=f),
@@ -53,22 +90,14 @@ def find_active_channel(user):
         Q(),
     )
 
-    # TODO: figure out how to activate storage
-    all_channels = dje.models.Event.objects.all()
-
+    # retrieve all active channels from the presented set
     active_channels = set(
         [event.channel for event in dje.models.Event.objects.filter(condition).all()]
     )
-    # print("active channels", active_channels)
     if len(active_channels) == 0:
         return None, None, None
 
-    # TODO: implement load balancing
-    return (
-        list(active_channels)[0],
-        user_candidate_channels[list(active_channels)[0]][0],
-        user_candidate_channels[list(active_channels)[0]][1],
-    )
+    return select_active_channels(active_channels, user_candidate_channels)
 
 
 @api_view(["POST"])

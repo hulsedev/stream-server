@@ -34,7 +34,8 @@ class Cluster(models.Model):
 
 class QueryRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    task = models.CharField(max_length=50)
+    task = models.CharField(max_length=128)
+    model = models.CharField(max_length=512)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     date_fullfilled = models.DateTimeField(blank=True, null=True)
