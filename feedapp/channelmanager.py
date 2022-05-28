@@ -99,16 +99,17 @@ class ChannelAuthManager(DefaultChannelManager):
         )
         record.save()
 
+        # build data dict to be fed to the event request
+        event_data = {
+            "qid": record.id,
+        }
+        event_data.update(**request.GET)
+
         # send event to producer channel for query
         dje.send_event(
             producer_channel,
             "message",
-            {
-                "task": request.GET.get("task"),
-                "data": request.GET.get("data"),
-                "model": request.GET.get("model"),
-                "qid": record.id,
-            },
+            event_data,
         )
 
         return True

@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  ci-run:
+    name: Run CI
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    runs-on: "ubuntu-latest"
+
+    env:
+      CI: 1
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Lint
+        run: |
+          pip install black>=20.8b1
+          black --check .
+
+      - name: Cache conda
+        uses: actions/cache@v1
+        env:
+          CACHE_NUMBER: 1
+        with:
+          path: /home/runner/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-dependencies-${{ hashFiles('environment.yml') }}
+
+      - name: Install conda
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          channels: conda-forge,anaconda
+          channel-priority: true
+          use-only-tar-bz2: true
+          activate-environment: invivomoldb
+          mamba-version: "*"
+
+      - name: Install Dependencies
+        shell: bash -l {0}
+        run: |
+          set -e
+          mamba install anaconda-client
+          # GitHub actions seem to cache login across GitHub actions runs,
+          # so we ignore this prompt related to this particular case
+          yes 2>/dev/null | anaconda login --username $ANACONDA_USER  --password $ANACONDA_PASSWORD || true
+          mamba env update -f environment.yml
+          conda develop .
+
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          bash scripts/start_docker_postgres.sh
+          sleep 2s # wait for dockerized postgres service to be up
+          bash scripts/runtests.sh
+
+      - name: Migrate
+        if: github.ref == 'refs/heads/master'
+        shell: bash -l {0}
+        run: |
+          set -e
+          alembic upgrade head
+
+      - name: Deploy docs
+        if: github.ref == 'refs/heads/master'
+        shell: bash -l {0}
+        run: |
+          git config user.name CI
+          git config user.email ""
+          bash scripts/docs.sh 
+          git add .
+          git commit -qm "Update docs"
+          git push origin master
+
+      - name: Upload libraries.yml to S3
+        if: github.ref == 'refs/heads/master'
+        shell: bash -l {0}
+        run: |
+          export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+          export AWS_DEFAULT_REGION=$AWS_S3_REGION_NAME
+          aws s3 cp libraries.yaml s3://$AWS_S3_BUCKET_NAME/libraries.yaml

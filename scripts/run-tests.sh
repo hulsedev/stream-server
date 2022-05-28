@@ -2,5 +2,6 @@ export $(cat .dev.env | xargs)
 
 python manage.py makemigrations
 python manage.py migrate
-echo "Running tests"
-python manage.py test serverless.tests.test_orchestrate_deployments --failfast
+echo "Starting running tests..."
+python manage.py test feedapp.tests.test_channelmanager --failfast
+echo "Done running tests!"
