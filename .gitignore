@@ -4,6 +4,7 @@ staticfiles/
 .env*
 .*.env*
 .tmp*
+tmp/
 log/
 pid.txt
 

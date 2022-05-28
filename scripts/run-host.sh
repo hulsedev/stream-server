@@ -1,11 +1,14 @@
-# load env variables into current env
-export $(cat .env.tmp | xargs)
-export $(cat .env.local | xargs)
+export $(cat .env | xargs)
 
-# add current pid to the list of running process
-echo $$ >> $PID_FILE
+if [ -z $MOCK_API_KEY ]; then
+    printf "Provide the mock api key required for integration test"
+    exit 77
+fi
 
-# setup development version of hulse host
-source ../venv/bin/activate
-cd ../hulse-py/ && pip install -e .
+if [ -z $CLIENT_ENV_DIR ]; then
+    printf "Provide the path to the client virtual env"
+    exit 77
+fi
+
+source "${CLIENT_ENV_DIR}/bin/activate"
 hulse host --key=$MOCK_API_KEY

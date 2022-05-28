@@ -28,7 +28,6 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "heheejeeje")
 HULSE_LANDING_URL = os.environ.get("HULSE_LANDING_URL", "https://hulse.app/")
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
@@ -186,5 +185,3 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 import django_on_heroku
 
 django_on_heroku.settings(locals())
-
-print("LOADED DATABASES", DATABASES)
