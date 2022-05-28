@@ -78,36 +78,36 @@ def handle_result(request):
     """Result posted from host in response to query"""
     if "qid" not in request.data or "result" not in request.data:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    else:
-        # find the record corresponding to the request
-        record = QueryRecord.objects.filter(pk=request.data.get("qid")).first()
-        if record.status == "done":
-            return Response(
-                {"detail": "query already completed"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        query_consumer_channel = find_query_consumer_channel(record)
-        if not query_consumer_channel:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        # send response to the client
-        dje.send_event(
-            query_consumer_channel,
-            "message",
-            {
-                "qid": record.id,
-                "result": request.data.get("result"),
-                "cluster": record.cluster.name,
-                "producer": record.producer.username,
-            },
+    
+    # find the record corresponding to the request
+    record = QueryRecord.objects.filter(pk=request.data.get("qid")).first()
+    if record.status == "done":
+        return Response(
+            {"detail": "query already completed"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
-        # update query record status in db
-        record.status = "done"
-        record.save()
+    query_consumer_channel = find_query_consumer_channel(record)
+    if not query_consumer_channel:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(status=status.HTTP_200_OK)
+    # send response to the client
+    dje.send_event(
+        query_consumer_channel,
+        "message",
+        {
+            "qid": record.id,
+            "result": request.data.get("result"),
+            "cluster": record.cluster.name,
+            "producer": record.producer.username,
+        },
+    )
+
+    # update query record status in db
+    record.status = "done"
+    record.save()
+
+    return Response(status=status.HTTP_200_OK)
 
 
 def find_query_consumer_channel(record) -> str:
