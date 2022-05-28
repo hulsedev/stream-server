@@ -8,4 +8,4 @@ echo $$ >> $PID_FILE
 source ../venv/bin/activate
 cd ../hulse-py/ && pip install -e .
 
-# TODO: add client query
+# TODO: add client query file call here
