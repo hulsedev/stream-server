@@ -53,7 +53,7 @@ def select_active_channels(active_channels, user_candidate_channels):
     selected_channel = list(sorted_channels.keys())[0]
     # update availability buffer
     availability_buffer[selected_channel] = {
-        "count": availability_buffer[selected_channel] + 1,
+        "count": availability_buffer[selected_channel]["count"] + 1,
         "updated_at": datetime.now(),
     }
 
