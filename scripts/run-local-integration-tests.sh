@@ -28,9 +28,10 @@ export STREAM_ENV_DIR="${PROJECTS_BASE}/${SCRATCH_DIR}/${STREAM_ENV_NAME}"
 export API_ENV_DIR="${PROJECTS_BASE}/${SCRATCH_DIR}/${API_ENV_NAME}"
 export REQUIREMENTS_FILE="requirements.txt"
 export STREAM_SERVER_PORT=8001
-export HULSE_STREAM_URL="http://127.0.0.1:${STREAM_SERVER_PORT}/"
+export HULSE_STREAM_URL="http://localhost:${STREAM_SERVER_PORT}/"
 export API_SERVER_PORT=8002
-export HULSE_API_URL="http://127.0.0.1:${API_SERVER_PORT}/"
+export HULSE_API_URL="http://localhost:${API_SERVER_PORT}/"
+export TMP_FILE="${STREAM_PROJECT_DIR}/.tmp"
 
 # optionally removing db & logs
 if [ -d "${LOG_DIR}" ]; then
@@ -38,9 +39,14 @@ if [ -d "${LOG_DIR}" ]; then
     rm -rf $LOG_DIR && mkdir $LOG_DIR
 fi
 
-if [ -d "${DB_PATH}" ]; then
+if [ -f "${DB_PATH}" ]; then
     printf "Removing ${DB_PATH} database\n"
     rm $DB_PATH
+fi
+
+if [ -f "${TMP_FILE}" ]; then
+    printf "Removing ${TMP_FILE} file\n"
+    rm $TMP_FILE
 fi
 
 # checking if python virtual envs are properly setup
@@ -49,7 +55,9 @@ if [ ! -d "${API_ENV_DIR}" ]; then
     printf "Installing API server dependencies to ${API_ENV_DIR}\n"
     python -m venv ${API_ENV_DIR}
     source ${API_ENV_DIR}/bin/activate
+    echo ${API_ENV_DIR}/bin/activate
     pip install -r ${API_PROJECT_DIR}/${REQUIREMENTS_FILE}
+    echo ${API_PROJECT_DIR}/${REQUIREMENTS_FILE}
     deactivate
 fi
 
@@ -77,7 +85,7 @@ fi
 # run both servers in the background
 tput clear
 bash ${API_PROJECT_DIR}/scripts/run-server.sh &> $API_LOG_FILE &
-sleep 5 # wait for the api server to start
+sleep 10 # wait for the api server to start
 bash ${API_PROJECT_DIR}/scripts/create-mockuser.sh &> $MOCKUSER_LOG_FILE
 bash ${STREAM_PROJECT_DIR}/scripts/run-server.sh &> $STREAM_LOG_FILE &
 sleep 10 # wait for the stream server to start
@@ -86,4 +94,4 @@ bash ${STREAM_PROJECT_DIR}/scripts/run-host.sh &> $HOST_LOG_FILE &
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
 # kill all servers & background python processes
-killall Python
+killall python Python
