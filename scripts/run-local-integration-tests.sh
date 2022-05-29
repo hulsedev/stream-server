@@ -85,8 +85,5 @@ sleep 10 # wait for the stream server to start
 bash ${STREAM_PROJECT_DIR}/scripts/run-host.sh &> $HOST_LOG_FILE &
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
-#rm -rf $LOG_DIR
-#rm $API_SERVER_ROOT/$DB_NAME ".tmp" ".tmp.env"
-
 # kill all servers & background python processes
 killall Python

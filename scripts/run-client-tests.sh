@@ -11,5 +11,4 @@ if [ -z $CLIENT_ENV_DIR ]; then
 fi
 
 source "${CLIENT_ENV_DIR}/bin/activate"
-#pytest ${STREAM_PROJECT_DIR}/tests/* -x --full-trace
-printf "Reached here 🚀🚀🚀 ready to run some integration tests!"
+pytest ${STREAM_PROJECT_DIR}/tests/test_client.py -x --full-trace
