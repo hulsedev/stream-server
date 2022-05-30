@@ -33,14 +33,12 @@ jobs:
           python-version: 3.9
           cache: "pip"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
       - name: Fetch hulse-py & api-server
         shell: bash -l {0}
         run: |
           cd ..
-          git clone git@github.com:hulsedev/api-server.git
+          git clone git@github.com:hulsedev/api-server.git 
+          cd api-server && git checkout origin/pipeline-wrapper && cd .. # temporary line
           git clone git@github.com:hulsedev/hulse-py.git
           cd hulse-stream/
 
