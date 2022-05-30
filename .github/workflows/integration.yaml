@@ -37,7 +37,6 @@ jobs:
           cache: "pip"
 
       - name: Fetch hulse-py & api-server
-        shell: bash -l {0}
         run: |
           cd ..
           git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/api-server.git 
@@ -47,7 +46,6 @@ jobs:
           cd stream-server/
 
       - name: Run integration tests
-        shell: bash -l {0}
         run: |
           bash scripts/start-docker-postgres.sh
           sleep 5 # wait for postgres to start
