@@ -83,6 +83,7 @@ class ChannelManagerTestCase(TestCase):
 
         # make sure events are consistently displayed
         stored_events = dje.models.Event.objects.all()
+        # 2 producer welcome, 1 query event, 2 consumer welcome
         self.assertEqual(len(stored_events), 5)
         self.assertEqual(stored_events[4].type, "welcome")
 
@@ -114,8 +115,33 @@ class ChannelManagerTestCase(TestCase):
         self.assertEqual(list(channels)[0], channel)
 
         stored_events = dje.models.Event.objects.all()
+        # 2 events seem to be created by the producer channel on welcome
         self.assertEqual(len(stored_events), 2)
         self.assertEqual(stored_events[1].type, "welcome")
 
     def test_get_channels_failure(self):
+        pass
+
+    def test_find_active_channels_success(self):
+        pass
+
+    def test_find_active_channels_no_producer(self):
+        pass
+
+    def test_find_active_channels_balance_producers(self):
+        pass
+
+    def test_check_consumer_inputs_success(self):
+        pass
+
+    def test_check_consumer_inputs_missing_data(self):
+        pass
+
+    def test_check_consumer_inputs_missing_model_wrong_task(self):
+        pass
+
+    def test_handle_query_request_success(self):
+        pass
+
+    def test_handle_query_request_no_producer(self):
         pass

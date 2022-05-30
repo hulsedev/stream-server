@@ -97,11 +97,9 @@ class ChannelAuthManager(DefaultChannelManager):
         # build data dict to be fed to the event request
         event_data = {
             "qid": record.id,
+            "data": request.GET.get("data"),
+            "task": request.GET.get("task"),
         }
-        # manually unwrap the data from the request
-        event_data.update(
-            {"data": request.GET.get("data"), "task": request.GET.get("task")}
-        )
 
         # send event to producer channel for query
         dje.send_event(
