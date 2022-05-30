@@ -12,7 +12,7 @@ class ClientTestCase(unittest.TestCase):
     def test_query_success(self):
         task = "text-classification"
         data = "I'm a little tea pot"
-        result = self.client.query(task=task, data=data, api_key=self.api_key)
+        result = self.client.query(task=task, data=data)
         print(result)
         self.assertEqual(type(result), dict)
         self.assertTrue("cluster" in result)

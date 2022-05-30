@@ -14,5 +14,6 @@ export MOCK_CLUSTER_NAME="mockcluster"
 export MOCK_CLUSTER_DESCRIPTION="mockcluster description"
 
 source "${CLIENT_ENV_DIR}/bin/activate"
-hulse create-cluster --name="${MOCK_CLUSTER_NAME}" --description="${MOCK_CLUSTER_DESCRIPTION}" --key=$MOCK_API_KEY
-hulse host --key=$MOCK_API_KEY
+hulse init --email="${MOCKEMAIL}" --username="${MOCKUSERNAME}" --api-key="${MOCK_API_KEY}"
+hulse create-cluster --name="${MOCK_CLUSTER_NAME}" --description="${MOCK_CLUSTER_DESCRIPTION}"
+hulse host

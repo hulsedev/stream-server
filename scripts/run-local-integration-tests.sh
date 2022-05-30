@@ -41,6 +41,10 @@ export API_SERVER_PORT=8002
 export HULSE_API_URL="http://localhost:${API_SERVER_PORT}/"
 export TMP_FILE="${STREAM_PROJECT_DIR}/.tmp"
 
+# mock user specific vars
+export MOCKUSERNAME="mockuser"
+export MOCKEMAIL="mockemail@gmail.com"
+
 # optionally removing tmp file & logs
 if [ -d "${LOG_DIR}" ]; then
     printf "Removing ${LOG_DIR} directory\n"
@@ -58,9 +62,7 @@ if [ ! -d "${API_ENV_DIR}" ]; then
     printf "Installing API server dependencies to ${API_ENV_DIR}\n"
     python -m venv ${API_ENV_DIR}
     source ${API_ENV_DIR}/bin/activate
-    echo ${API_ENV_DIR}/bin/activate
     pip install -r ${API_PROJECT_DIR}/${REQUIREMENTS_FILE}
-    echo ${API_PROJECT_DIR}/${REQUIREMENTS_FILE}
     deactivate
 fi
 
@@ -94,8 +96,8 @@ bash ${STREAM_PROJECT_DIR}/scripts/run-server.sh &> $STREAM_LOG_FILE &
 sleep 5 # wait for the stream server to start
 # run host & client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-host.sh &> $HOST_LOG_FILE &
-sleep 2 # wait for host to start before running client tests
+sleep 5 # wait for host to start before running client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
 # kill all servers & background python processes
-killall python
+killall python Python
