@@ -37,10 +37,17 @@ jobs:
         shell: bash -l {0}
         run: |
           cd ..
-          git clone git@github.com:hulsedev/api-server.git 
+          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/api-server.git 
           cd api-server && git checkout origin/pipeline-wrapper && cd .. # temporary line
-          git clone git@github.com:hulsedev/hulse-py.git
-          cd hulse-stream/
+          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/hulse-py.git
+          cd stream-server/
+
+      - name: Fetching stream server
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: ourcompany/whateverrepo
+          path: whateverrepo
 
       - name: Run integration tests
         shell: bash -l {0}

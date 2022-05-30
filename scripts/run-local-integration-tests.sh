@@ -9,14 +9,20 @@ CLIENT_PROJECT_NAME=${3}
 validateParameters ${API_PROJECT_NAME} ${STREAM_PROJECT_NAME} ${CLIENT_PROJECT_NAME}
 
 export $(cat .env | xargs)
+
+# find project structure
 export API_PROJECT_DIR="${PROJECTS_BASE}/${API_PROJECT_NAME}"
 export STREAM_PROJECT_DIR="${PROJECTS_BASE}/${STREAM_PROJECT_NAME}"
 export CLIENT_PROJECT_DIR="${PROJECTS_BASE}/${CLIENT_PROJECT_NAME}"
+
+# setup log directory and files
 export LOG_DIR="log"
 export API_LOG_FILE="${LOG_DIR}/api_server.txt"
 export STREAM_LOG_FILE="${LOG_DIR}/stream_server.txt"
 export MOCKUSER_LOG_FILE="${LOG_DIR}/mockuser.txt"
 export HOST_LOG_FILE="${LOG_DIR}/host.txt"
+
+# setup virtual environment
 export SCRATCH_DIR="${STREAM_PROJECT_NAME}/tmp"
 export CLIENT_ENV_NAME="client-venv"
 export STREAM_ENV_NAME="stream-server-venv"
@@ -24,7 +30,11 @@ export API_ENV_NAME="api-server-venv"
 export CLIENT_ENV_DIR="${PROJECTS_BASE}/${SCRATCH_DIR}/${CLIENT_ENV_NAME}"
 export STREAM_ENV_DIR="${PROJECTS_BASE}/${SCRATCH_DIR}/${STREAM_ENV_NAME}"
 export API_ENV_DIR="${PROJECTS_BASE}/${SCRATCH_DIR}/${API_ENV_NAME}"
+
+# define requirements file
 export REQUIREMENTS_FILE="requirements.txt"
+
+# setup test server addresses
 export STREAM_SERVER_PORT=8001
 export HULSE_STREAM_URL="http://localhost:${STREAM_SERVER_PORT}/"
 export API_SERVER_PORT=8002
