@@ -22,6 +22,9 @@ jobs:
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DEBUG: ${{ secrets.DEBUG }}
+      API_SERVER_PORT: 8002
+      STREAM_SERVER_PORT: 8001
+      PROJECTS_BASE: ".."
 
     steps:
       - name: Checkout the code
@@ -40,6 +43,7 @@ jobs:
           git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/api-server.git 
           cd api-server && git checkout origin/setup-integration-tests && cd .. # temporary line
           git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/hulse-py.git
+          cd hulse-py && git checkout origin/pipeline-wrapper && cd .. # temporary line
           cd stream-server/
 
       - name: Run integration tests
@@ -48,7 +52,3 @@ jobs:
           bash scripts/start-docker-postgres.sh
           sleep 5 # wait for postgres to start
           bash scripts/run-ci-integration-tests.sh api-server stream-server hulse-py
-        env:
-          API_SERVER_PORT: 8002
-          STREAM_SERVER_PORT: 8001
-          PROJECTS_BASE: "../"

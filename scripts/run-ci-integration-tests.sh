@@ -47,6 +47,8 @@ export TMP_FILE="${STREAM_PROJECT_DIR}/.tmp"
 if [ -d "${LOG_DIR}" ]; then
     printf "Removing ${LOG_DIR} directory\n"
     rm -rf $LOG_DIR && mkdir $LOG_DIR
+else
+    mkdir $LOG_DIR
 fi
 
 if [ -f "${TMP_FILE}" ]; then
@@ -56,7 +58,6 @@ fi
 
 # checking if python virtual envs are properly setup
 if [ ! -d "${API_ENV_DIR}" ]; then
-    tput clear
     printf "Installing API server dependencies to ${API_ENV_DIR}\n"
     python -m venv ${API_ENV_DIR}
     source ${API_ENV_DIR}/bin/activate
@@ -67,7 +68,6 @@ if [ ! -d "${API_ENV_DIR}" ]; then
 fi
 
 if [ ! -d "${STREAM_ENV_DIR}" ]; then
-    tput clear
     printf "Installing Stream server dependencies to ${STREAM_ENV_DIR}\n"
     python -m venv ${STREAM_ENV_DIR}
     source ${STREAM_ENV_DIR}/bin/activate
@@ -76,7 +76,6 @@ if [ ! -d "${STREAM_ENV_DIR}" ]; then
 fi
 
 if [ ! -d "${CLIENT_ENV_DIR}" ]; then
-    tput clear
     printf "Installing Client dependencies to ${CLIENT_ENV_DIR}\n"
     python -m venv ${CLIENT_ENV_DIR}
     source ${CLIENT_ENV_DIR}/bin/activate
@@ -88,7 +87,6 @@ if [ ! -d "${CLIENT_ENV_DIR}" ]; then
 fi
 
 # run both servers in the background
-tput clear
 bash ${API_PROJECT_DIR}/scripts/run-server.sh &> $API_LOG_FILE &
 sleep 10 # wait for the api server to start
 bash ${API_PROJECT_DIR}/scripts/create-mockuser.sh &> $MOCKUSER_LOG_FILE
