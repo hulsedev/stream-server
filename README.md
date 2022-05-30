@@ -21,6 +21,7 @@ pip install -r requirements.txt
 
 You can directly run the app using the following script:
 ```bash
+bash scripts/create-superuser.sh
 bash scripts/run-debug-server.sh
 ```
 
