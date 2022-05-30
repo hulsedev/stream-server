@@ -11,7 +11,7 @@ on:
 
 jobs:
   ci-run:
-    name: Run CI
+    name: Run integration tests
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: "ubuntu-latest"
 
@@ -31,19 +31,26 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
-          cache: pip
-
-      - name: Lint
-        run: |
-          pip install black>=20.8b1
-          black --check .
+          cache: "pip"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Fetch hulse-py & api-server
+        shell: bash -l {0}
+        run: |
+          cd ..
+          git clone git@github.com:hulsedev/api-server.git
+          git clone git@github.com:hulsedev/hulse-py.git
+          cd hulse-stream/
+
+      - name: Run integration tests
         shell: bash -l {0}
         run: |
           bash scripts/start-docker-postgres.sh
           sleep 5 # wait for postgres to start
-          bash scripts/run-tests.sh
+          bash scripts/run-ci-integration-tests.sh api-server stream-server hulse-py
+        env:
+          API_SERVER_PORT: 8002
+          STREAM_SERVER_PORT: 8001
+          PROJECTS_BASE: "../"
