@@ -98,4 +98,4 @@ sleep 2 # wait for host to start before running client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
 # kill all servers & background python processes
-killall python Python
+killall python
