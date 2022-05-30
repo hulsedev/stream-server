@@ -1,4 +1,3 @@
-tput clear
 source ./scripts/common.sh
 setProjectsBase
 
@@ -88,12 +87,13 @@ fi
 
 # run both servers in the background
 bash ${API_PROJECT_DIR}/scripts/run-server.sh &> $API_LOG_FILE &
-sleep 10 # wait for the api server to start
+sleep 5 # wait for the api server to start
 bash ${API_PROJECT_DIR}/scripts/create-mockuser.sh &> $MOCKUSER_LOG_FILE
 bash ${STREAM_PROJECT_DIR}/scripts/run-server.sh &> $STREAM_LOG_FILE &
-sleep 10 # wait for the stream server to start
+sleep 5 # wait for the stream server to start
 # run host & client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-host.sh &> $HOST_LOG_FILE &
+sleep 2 # wait for host to start before running client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
 # kill all servers & background python processes
