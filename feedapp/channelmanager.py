@@ -69,13 +69,7 @@ class ChannelAuthManager(DefaultChannelManager):
 
         # already in the channel manager, and assume that storage activated
         event_data = {f"hello {welcome_type}": f"{channel}"}
-        e = storage_backend.append_event(channel, "welcome", event_data)
-
-        # TODO: check if publishing to listener managers is necessary
-        listener_manager = dje.consumers.get_listener_manager()
-        listener_manager.add_to_queues(channel, e)
-
-        # NOTE: can skip the publication step since artificial event, local
+        _ = storage_backend.append_event(channel, "welcome", event_data)
 
     def handle_query_request(self, request, view_kwargs) -> bool:
         user = Token.objects.get(key=view_kwargs.get("member_id")).user
