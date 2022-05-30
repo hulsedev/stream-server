@@ -107,7 +107,7 @@ def handle_result(request):
     """Result posted from host in response to query"""
     if "qid" not in request.data or "result" not in request.data:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
     # find the record corresponding to the request
     record = QueryRecord.objects.filter(pk=request.data.get("qid")).first()
     if record.status == "done":

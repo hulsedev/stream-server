@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feedapp', '0006_remove_report_post_remove_report_reported_by_and_more'),
+        ("feedapp", "0006_remove_report_post_remove_report_reported_by_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='queryrecord',
-            name='model',
+            model_name="queryrecord",
+            name="model",
             field=models.CharField(blank=True, max_length=512, null=True),
         ),
         migrations.AlterField(
-            model_name='queryrecord',
-            name='task',
+            model_name="queryrecord",
+            name="task",
             field=models.CharField(blank=True, max_length=128, null=True),
         ),
     ]
