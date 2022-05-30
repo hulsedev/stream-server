@@ -11,6 +11,8 @@ class ChannelAuthManager(DefaultChannelManager):
     def can_read_channel(self, user, channel):
         try:
             role, token_str = channel.split("-")
+            if not role or not token_str:
+                raise ValueError("Invalid channel format")
         except Exception as e:
             return False
 
@@ -37,8 +39,6 @@ class ChannelAuthManager(DefaultChannelManager):
             channels = set([view_kwargs["channel"]])
         else:
             channels = set(request.GET.getlist("channel"))
-
-        print("received query for ", channels)
 
         # in case handling consumer request, add artificial welcome events
         if view_kwargs.get("format-channels")[0].startswith("consumer"):
@@ -79,9 +79,7 @@ class ChannelAuthManager(DefaultChannelManager):
 
     def handle_query_request(self, request, view_kwargs) -> bool:
         user = Token.objects.get(key=view_kwargs.get("member_id")).user
-        print("user posting query", user)
         if not user or not self.check_consumer_inputs(request):
-            print("invalid user or request")
             return False
 
         # find an active producer channel for this consumer query (shared cluster)

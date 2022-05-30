@@ -79,7 +79,6 @@ def handle_consumer_event(request, **kwargs):
 
 def handle_event(request, **kwargs):
     """Standard event handler function, tweaked for drf."""
-    print("hello from event handler")
     try:
         event_request = EventRequest(request, view_kwargs=kwargs)
         event_response = get_events(event_request)
