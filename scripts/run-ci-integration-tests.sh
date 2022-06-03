@@ -42,6 +42,10 @@ export HULSE_API_URL="http://localhost:${API_SERVER_PORT}/"
 # define tmp scratch file
 export TMP_FILE="${STREAM_PROJECT_DIR}/.tmp"
 
+# mock user specific vars
+export MOCKUSERNAME="mockuser"
+export MOCKEMAIL="mockemail@gmail.com"
+
 # optionally removing tmp file & logs
 if [ -d "${LOG_DIR}" ]; then
     printf "Removing ${LOG_DIR} directory\n"
@@ -95,4 +99,4 @@ sleep 5 # wait for host to start before running client tests
 bash ${STREAM_PROJECT_DIR}/scripts/run-client-tests.sh
 
 # kill all servers & background python processes
-killall python Python
+killall python
