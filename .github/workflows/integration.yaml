@@ -42,7 +42,7 @@ jobs:
           git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/api-server.git 
           #cd api-server && git checkout origin/setup-integration-tests && cd .. # temporary line
           git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/hulse-py.git
-          cd hulse-py && git checkout origin/model-support && cd .. # temporary line
+          #cd hulse-py && git checkout origin/model-support && cd .. # temporary line
           cd stream-server/
 
       - name: Run integration tests
