@@ -11,6 +11,8 @@ class ChannelAuthManager(DefaultChannelManager):
     def can_read_channel(self, user, channel):
         try:
             role, token_str = channel.split("-")
+            if not role or not token_str:
+                raise ValueError("Invalid channel format")
         except Exception as e:
             return False
 
@@ -38,18 +40,25 @@ class ChannelAuthManager(DefaultChannelManager):
         else:
             channels = set(request.GET.getlist("channel"))
 
-        # in case handling consumer request
+        # in case handling consumer request, add artificial welcome events
         if view_kwargs.get("format-channels")[0].startswith("consumer"):
             _ = self.handle_query_request(request, view_kwargs)
             self.add_artificial_welcome_event("consumer", channels)
         else:
-            logger.debug("Received producer request")
-            # artificially add a welcome event when producer logs in
             self.add_artificial_welcome_event("producer", channels)
 
         return channels
 
     def add_artificial_welcome_event(self, welcome_type, channels):
+        """Make sure the newly created channel is available in storage.
+
+        When creating a new producer/consumer channel, need to wait for an event
+        before it naturally gets logged into the storage backend. However, we need
+        to have it be available to be discovered by other channels, and receive
+        a message. Thus, put an artificial event in the storage backend to simulate
+        event propagation.
+        """
+
         storage_backend = dje.utils.get_storage()
         if len(channels) > 1:
             raise RuntimeError(
@@ -60,31 +69,24 @@ class ChannelAuthManager(DefaultChannelManager):
 
         # already in the channel manager, and assume that storage activated
         event_data = {f"hello {welcome_type}": f"{channel}"}
-        e = storage_backend.append_event(channel, "welcome", event_data)
-        # pub_id = str(e.id)
-        # pub_prev_id = str(e.id - 1)
-
-        # TODO: check if publishing to listener managers is necessary
-        listener_manager = dje.consumers.get_listener_manager()
-        listener_manager.add_to_queues(channel, e)
-
-        # NOTE: can skip the publication step since artificial event, local
+        _ = storage_backend.append_event(channel, "welcome", event_data)
 
     def handle_query_request(self, request, view_kwargs) -> bool:
-        logger.debug("Received query request")
         user = Token.objects.get(key=view_kwargs.get("member_id")).user
         if not user or not self.check_consumer_inputs(request):
-            print("invalid user or request")
             return False
 
         # find an active producer channel for this consumer query (shared cluster)
         producer_channel, cluster, producer = views.find_active_channel(user)
         if not producer_channel:
-            return False
+            # return False
+            # should we simply raise an error when nothing is found?
+            raise RuntimeError("No producer channel found")
 
         # acknowledge query since found an active producer
         record = models.QueryRecord(
             task=request.GET.get("task"),
+            model=request.GET.get("model"),
             status="pending",
             consumer=user,
             producer=producer,
@@ -92,21 +94,25 @@ class ChannelAuthManager(DefaultChannelManager):
         )
         record.save()
 
+        # build data dict to be fed to the event request
+        event_data = {
+            "qid": record.id,
+            "data": request.GET.get("data"),
+            "task": request.GET.get("task"),
+        }
+
         # send event to producer channel for query
         dje.send_event(
             producer_channel,
             "message",
-            {
-                "task": request.GET.get("task"),
-                "data": request.GET.get("data"),
-                "qid": record.id,
-            },
+            event_data,
         )
 
         return True
 
     def check_consumer_inputs(self, request):
         # make sure have both data and task
-        return request.GET.get("task") in settings.SUPPORTED_TASKS and request.GET.get(
-            "data"
-        )
+        return (
+            request.GET.get("task") in settings.SUPPORTED_TASKS
+            or request.GET.get("model")
+        ) and request.GET.get("data")

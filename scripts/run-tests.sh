@@ -1,6 +1,4 @@
-export $(cat .dev.env | xargs)
+export $(cat .env | xargs)
 
-python manage.py makemigrations
-python manage.py migrate
-echo "Running tests"
-python manage.py test serverless.tests.test_orchestrate_deployments --failfast
+python manage.py makemigrations && python manage.py migrate
+python manage.py test feedapp.tests --failfast

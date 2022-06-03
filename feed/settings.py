@@ -28,7 +28,6 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "heheejeeje")
 HULSE_LANDING_URL = os.environ.get("HULSE_LANDING_URL", "https://hulse.app/")
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
@@ -100,14 +99,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "feed.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-# NOTE: automatically forwarded to postgresql in prod
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DB_NAME", "hulse-api"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", 5432),
     }
 }
 
@@ -184,5 +183,3 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 import django_on_heroku
 
 django_on_heroku.settings(locals())
-
-print("LOADED DATABASES", DATABASES)

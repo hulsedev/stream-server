@@ -1,4 +1,4 @@
-name: Unit tests
+name: Integration tests
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   ci-run:
-    name: Run CI
+    name: Run integration tests
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: "ubuntu-latest"
 
@@ -22,6 +22,9 @@ jobs:
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DEBUG: ${{ secrets.DEBUG }}
+      API_SERVER_PORT: 8002
+      STREAM_SERVER_PORT: 8001
+      PROJECTS_BASE: ".."
 
     steps:
       - name: Checkout the code
@@ -31,28 +34,19 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
-          cache: pip
+          cache: "pip"
 
-      - name: Lint
+      - name: Fetch hulse-py & api-server
         run: |
-          pip install black>=20.8b1
-          black --check .
+          cd ..
+          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/api-server.git 
+          #cd api-server && git checkout origin/setup-integration-tests && cd .. # temporary line
+          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/hulsedev/hulse-py.git
+          cd hulse-py && git checkout origin/model-support && cd .. # temporary line
+          cd stream-server/
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run tests
+      - name: Run integration tests
         run: |
           bash scripts/start-docker-postgres.sh
           sleep 5 # wait for postgres to start
-          bash scripts/run-tests.sh
-
-      #- name: Deploy stream server to heroku
-      #  if: github.ref == 'refs/heads/master'
-      #  uses: nyakaz73/heroku-django-deploy@v0.81
-      #  with:
-      #    heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-      #    heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-      #    heroku_email_address: ${{ secrets.HEROKU_EMAIL }}
-      #    use_git: true
-      #    git_branch: master
+          bash scripts/run-ci-integration-tests.sh api-server stream-server hulse-py
